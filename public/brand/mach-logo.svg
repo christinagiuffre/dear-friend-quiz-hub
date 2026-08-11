@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" width="220" height="48" role="img" aria-label="MACH Coaching & Consulting">
+  <defs>
+    <linearGradient id="mach-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8848d8"/>
+      <stop offset="100%" stop-color="#41a0e4"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="4" width="40" height="40" rx="11" fill="url(#mach-grad)"/>
+  <path fill="#ffffff" d="M9 34V14h5.8l6.8 10.8L28.4 14H34v20h-5.2v-11.4l-5.6 8.6h-3.2l-5.6-8.6V34z"/>
+  <text x="50" y="31" font-family="Montserrat, Arial, Helvetica, sans-serif" font-weight="800" font-size="21" fill="#2c2440">MACH</text>
+</svg>

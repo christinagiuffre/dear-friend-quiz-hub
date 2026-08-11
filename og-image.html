@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Generate og-image.png</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      body { margin: 0; padding: 24px; font-family: "Open Sans", sans-serif; background: #e9e6f0; }
+      .note { max-width: 1200px; margin: 0 auto 16px; font-size: 14px; color: #444; line-height: 1.6; }
+      .note b { font-family: Montserrat, sans-serif; }
+      #card {
+        width: 1200px; height: 630px; position: relative; overflow: hidden;
+        background:
+          radial-gradient(60rem 40rem at 10% 0%, rgba(136,72,216,.28), transparent 60%),
+          radial-gradient(50rem 34rem at 95% 6%, rgba(65,160,228,.28), transparent 60%),
+          radial-gradient(46rem 34rem at 50% 105%, rgba(242,163,208,.34), transparent 62%),
+          #fff6ec;
+      }
+      .logo { position: absolute; top: 44px; left: 56px; width: 190px; }
+      .title {
+        position: absolute; top: 196px; left: 56px; margin: 0;
+        font-family: Montserrat, sans-serif; font-weight: 800; font-size: 76px;
+        line-height: 1.14; letter-spacing: -.02em; color: #2c2440;
+      }
+      .title span { color: #8848d8; }
+      .sub { position: absolute; top: 396px; left: 56px; margin: 0; font-size: 34px; color: #6b6480; }
+      .pill {
+        position: absolute; top: 472px; left: 56px;
+        background: rgba(255,255,255,.85); border-radius: 32px;
+        padding: 16px 36px; font-size: 26px; font-weight: 600; color: #8848d8;
+      }
+      .chars { position: absolute; right: 70px; top: 50%; transform: translateY(-50%); width: 430px; }
+    </style>
+  </head>
+  <body>
+    <p class="note">
+      <b>How to export:</b> open this file in a browser (or run <b>npm run dev</b> and visit
+      <b>/tools/og-image.html</b> so the images resolve), wait a second for Montserrat to load,
+      then open DevTools, right-click the <b>#card</b> element and choose
+      <b>“Capture node screenshot”</b>. Save the result over <b>public/og-image.png</b>.
+      The committed placeholder uses a substitute headline font; this version uses real Montserrat.
+    </p>
+
+    <div id="card">
+      <img class="logo" src="../public/brand/mach-logo.svg" alt="MACH" />
+      <h1 class="title">Why do I feel<br /><span>weird today?</span></h1>
+      <p class="sub">Am I bored, overwhelmed or lonely?</p>
+      <div class="pill">60 seconds · No sign-up · Free</div>
+      <img class="chars" src="../public/brand/duo.png" alt="Sunny and Sheepito" />
+    </div>
+  </body>
+</html>
