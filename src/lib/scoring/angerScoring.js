@@ -23,8 +23,10 @@ const CAUSE_WEIGHTS = {
   'a3-c': {},
   'a3-d': { HURT: 2 },
   'a3-other': {},
-  // a4 safety/power/unfair
+  // a4 safety + emotional experience
   'a4-a': { SAFETY: 3, THREAT: 3 },
+  'a4-safety-no': {},
+  'a4-safety-unsure': {},
   'a4-b': { HURT: 2, UNMET_NEED: 2 },
   'a4-c': { POWERLESS: 3 },
   'a4-d': { UNFAIR: 3 },

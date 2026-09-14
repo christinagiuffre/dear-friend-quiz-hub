@@ -18,6 +18,7 @@ const procrastination = {
   trustPoints: ['No sign-up', 'No shame — just curiosity', 'Includes a five-minute starting step'],
 
   tiePriority: [
+    'NO_CLEAR_BLOCKER',
     'UNCLEAR',
     'TOO_BIG',
     'FEAR_FAILURE',
@@ -99,6 +100,18 @@ const procrastination = {
   ],
 
   results: {
+    NO_CLEAR_BLOCKER: {
+      id: 'NO_CLEAR_BLOCKER',
+      title: 'Nothing strongly stands out as the main blocker right now.',
+      shortLabel: 'No clear blocker',
+      art: 'duo',
+      summary:
+        'Nothing strongly stands out as the main blocker right now. That does not mean you are failing — sometimes the next step is simply to begin.',
+      immediateAction: 'Pick one small, low-pressure action and do it for five minutes.',
+      strategy: 'Start with the easiest visible step. You do not need to understand everything first.',
+      fiveMinuteStep: 'Choose one tiny task and work on it for five minutes — then pause and notice how you feel.',
+      affirmation: 'Starting small is still starting.',
+    },
     UNCLEAR: {
       id: 'UNCLEAR',
       title: 'The task may be unclear.',

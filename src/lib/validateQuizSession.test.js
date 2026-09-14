@@ -39,11 +39,16 @@ describe('validateQuizSession', () => {
       'a1-trigger': answer(anger, 'a1-trigger', 'a1-a'),
       'a2-underlying': answer(anger, 'a2-underlying', 'a2-a'),
       'a3-boundary': answer(anger, 'a3-boundary', 'a3-c'),
-      'a4-signals': answer(anger, 'a4-signals', 'a4-a'),
+      'a4-safety': answer(anger, 'a4-safety', 'a4-a'),
     }
     const result = validateQuizSession({ quizId: anger.id, answersByQuestionId: answers })
     expect(result.valid).toBe(true)
-    expect(result.applicableQuestionIds).toEqual(['a1-trigger', 'a2-underlying', 'a3-boundary', 'a4-signals'])
+    expect(result.applicableQuestionIds).toEqual([
+      'a1-trigger',
+      'a2-underlying',
+      'a3-boundary',
+      'a4-safety',
+    ])
   })
 
   it('rejects stale answers outside applicable route', () => {

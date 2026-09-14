@@ -23,8 +23,10 @@ function advanceToStep3() {
   })
   fireEvent.click(screen.getByRole('button', { name: 'Next' }))
 
-  for (let i = 0; i < 4; i++) {
-    fireEvent.click(screen.getAllByRole('radio', { name: 'No' })[0])
+  while (!screen.queryByRole('button', { name: 'Skip this step' })) {
+    const noButtons = screen.queryAllByRole('radio', { name: 'No' })
+    if (!noButtons.length) break
+    fireEvent.click(noButtons[0])
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
   }
 }

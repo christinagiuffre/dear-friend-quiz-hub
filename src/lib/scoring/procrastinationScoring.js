@@ -54,7 +54,7 @@ export function scoreProcrastinationResults(answersByQuestionId) {
     .sort((a, b) => b[1] - a[1])
 
   if (!entries.length) {
-    return { resultId: 'WAITING_MOTIVATION', secondResultId: null, tally, showAlsoShowingUp: false }
+    return { resultId: 'NO_CLEAR_BLOCKER', secondResultId: null, tally, showAlsoShowingUp: false }
   }
 
   const highest = entries[0][1]

@@ -41,7 +41,7 @@ const anger = {
       options: [
         { id: 'a2-a', label: 'Hurt or rejection' },
         { id: 'a2-b', label: 'Something unfair' },
-        { id: 'a2-c', label: 'Fear or feeling unsafe' },
+        { id: 'a2-c', label: 'Uneasy or worried (not immediate physical danger)' },
         { id: 'a2-d', label: 'Exhaustion or overwhelm' },
         { id: 'a2-e', label: 'Feeling powerless' },
         { id: 'a2-other', label: 'Something else / I’m not sure' },
@@ -60,15 +60,24 @@ const anger = {
       ],
     },
     {
-      id: 'a4-signals',
+      id: 'a4-safety',
       scoringRole: 'cause',
-      prompt: 'Do you feel unsafe, dismissed, powerless or treated unfairly?',
+      prompt: 'Do you feel physically unsafe or at risk of harm right now?',
       options: [
         {
           id: 'a4-a',
-          label: 'Unsafe — I need to prioritise safety',
+          label: 'Yes — I feel physically unsafe or at risk of harm',
           shortCircuit: 'SAFETY',
         },
+        { id: 'a4-safety-no', label: 'No — I am not in immediate physical danger' },
+        { id: 'a4-safety-unsure', label: 'I’m not sure' },
+      ],
+    },
+    {
+      id: 'a4-experience',
+      scoringRole: 'cause',
+      prompt: 'Emotionally, which feels closest right now?',
+      options: [
         { id: 'a4-b', label: 'Dismissed or not taken seriously' },
         { id: 'a4-c', label: 'Powerless or stuck' },
         { id: 'a4-d', label: 'Treated unfairly' },
@@ -105,7 +114,8 @@ const anger = {
     SAFETY: {
       id: 'SAFETY', title: 'Your safety matters most right now.', shortLabel: 'Prioritise safety', art: 'pause', isSafety: true,
       summary: 'If you feel unsafe, your anger may be a valid alarm. Please put safety first.',
-      immediateAction: 'Move somewhere safer if you can. Contact someone you trust or local support if needed.',
+      immediateAction:
+        'Move somewhere safer if you can. Contact someone you trust or local support if needed. If you or someone else may be in immediate danger, contact your local emergency services or a trusted person who can help you get somewhere safer.',
       underneath: 'Your nervous system may be signalling real danger.', signalling: 'Anger here may be protecting you.',
       beforeReacting: 'Reduce stimulation. Do not stay in an unsafe situation to “work through” feelings.',
       need: 'Safety, support and space to regroup.', couldSay: null,

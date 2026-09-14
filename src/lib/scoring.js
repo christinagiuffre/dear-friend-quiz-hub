@@ -43,6 +43,12 @@ export function scoreQuiz(quiz, answersByQuestionId) {
   }
 }
 
+export function scoreCheckinResult(checkin, answersByQuestionId) {
+  if (checkin.type === 'simple') return scoreQuiz(checkin, answersByQuestionId)
+  if (checkin.type === 'weighted') return scoreWeightedQuiz(checkin, answersByQuestionId)
+  return null
+}
+
 export function scoreWeightedQuiz(quiz, answersByQuestionId) {
   if (quiz.id === 'behind-my-anger') return scoreAngerResults(answersByQuestionId)
   if (quiz.id === 'what-do-i-need') return scoreNeedsResults(answersByQuestionId)
