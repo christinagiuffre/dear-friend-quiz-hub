@@ -7,6 +7,7 @@ import { getCheckin } from '../data/quizzes'
 import { site } from '../data/site'
 import { buildShareText } from '../lib/share'
 import { validateQuizSession } from '../lib/validateQuizSession'
+import { scoreCheckinResult } from '../lib/scoring'
 
 function buildAngerPhrase(result, tailoring) {
   const need = tailoring?.phraseNeed || 'a moment to figure this out'
@@ -23,7 +24,6 @@ export default function CheckInResult() {
   const { quizId, resultId } = useParams()
   const location = useLocation()
   const checkin = getCheckin(quizId)
-  const result = checkin?.results?.[String(resultId).toUpperCase()]
   const scoreState = location.state
   const answersByQuestionId = scoreState?.answersByQuestionId
 
@@ -32,24 +32,52 @@ export default function CheckInResult() {
   }, [resultId])
 
   if (!checkin) return <Navigate to="/" replace />
-  if (!result) return <Navigate to={`/quiz/${checkin.id}`} replace />
 
-  if (answersByQuestionId) {
-    const validation = validateQuizSession({ quizId: checkin.id, answersByQuestionId })
-    if (!validation.valid) {
-      return <Navigate to={`/quiz/${checkin.id}/play`} replace state={{ validationError: validation.message }} />
-    }
+  if (!answersByQuestionId) {
+    return <Navigate to={`/quiz/${checkin.id}/play`} replace />
   }
 
+  const validation = validateQuizSession({ quizId: checkin.id, answersByQuestionId })
+  if (!validation.valid) {
+    return (
+      <Navigate
+        to={`/quiz/${checkin.id}/play`}
+        replace
+        state={{ validationError: validation.message }}
+      />
+    )
+  }
+
+  const scored = scoreCheckinResult(checkin, answersByQuestionId)
+  if (!scored?.resultId) {
+    return <Navigate to={`/quiz/${checkin.id}/play`} replace />
+  }
+
+  const expectedResultId = String(scored.resultId).toLowerCase()
+  const urlResultId = String(resultId).toLowerCase()
+
+  if (expectedResultId !== urlResultId) {
+    return (
+      <Navigate
+        to={`/quiz/${checkin.id}/result/${expectedResultId}`}
+        replace
+        state={{ ...scored, answersByQuestionId }}
+      />
+    )
+  }
+
+  const result = checkin.results[scored.resultId]
+  if (!result) return <Navigate to={`/quiz/${checkin.id}`} replace />
+
   const secondResult =
-    scoreState?.showAlsoShowingUp && scoreState?.secondResultId
-      ? checkin.results[scoreState.secondResultId]
+    scored.showAlsoShowingUp && scored.secondResultId
+      ? checkin.results[scored.secondResultId]
       : null
 
   if (checkin.type === 'simple') {
     const shareText = buildShareText(result.title, site.shortUrl)
     const mixedNote =
-      scoreState?.showAlsoShowingUp && secondResult
+      scored.showAlsoShowingUp && secondResult
         ? `Also showing up: ${secondResult.shortLabel}.`
         : null
 
@@ -84,7 +112,7 @@ export default function CheckInResult() {
   }
 
   if (checkin.id === 'behind-my-anger') {
-    const secondaryNote = buildSecondaryNote(result, scoreState?.secondResultId)
+    const secondaryNote = buildSecondaryNote(result, scored.secondResultId)
 
     return (
       <Layout>
@@ -107,7 +135,7 @@ export default function CheckInResult() {
               },
               {
                 heading: 'Words you could use',
-                body: buildAngerPhrase(result, scoreState?.tailoring),
+                body: buildAngerPhrase(result, scored.tailoring),
               },
             ]}
             reminder={result.reminder}
@@ -121,7 +149,7 @@ export default function CheckInResult() {
   }
 
   if (checkin.id === 'what-do-i-need') {
-    const layered = scoreState?.layered
+    const layered = scored.layered
     const summary = layered
       ? [layered.startHere, layered.alsoNeed, layered.thenConsider].filter(Boolean).join(' ')
       : result.summary

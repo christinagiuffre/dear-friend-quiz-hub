@@ -60,7 +60,8 @@ describe('QA: all quiz flows', () => {
       'a1-trigger': answer(anger, 'a1-trigger', 'a1-c'),
       'a2-underlying': answer(anger, 'a2-underlying', 'a2-a'),
       'a3-boundary': answer(anger, 'a3-boundary', 'a3-c'),
-      'a4-signals': answer(anger, 'a4-signals', 'a4-c'),
+      'a4-safety': answer(anger, 'a4-safety', 'a4-safety-no'),
+      'a4-experience': answer(anger, 'a4-experience', 'a4-c'),
       'a5-physical': answer(anger, 'a5-physical', 'a5-a'),
       'a6-need': answer(anger, 'a6-need', 'a6-a'),
     }
@@ -110,16 +111,23 @@ describe('QA: all quiz flows', () => {
     expect(scored.resultId).toBe('SPARK')
   })
 
-  it('weighted quizzes: 6 consecutive question numbers', () => {
+  it('weighted quizzes: consecutive question numbers', () => {
+    const expectedTotals = {
+      [anger.id]: 7,
+      [needs.id]: 6,
+      [procrastination.id]: 6,
+    }
+
     for (const quiz of [anger, needs, procrastination]) {
       const applicable = quiz.questions
-      expect(applicable.length).toBe(6)
+      const total = expectedTotals[quiz.id]
+      expect(applicable.length).toBe(total)
       applicable.forEach((q, i) => {
         const partial = {}
         for (let j = 0; j < i; j++) partial[applicable[j].id] = { id: 'answered' }
         const p = getProgress(quiz, partial, q.id)
         expect(p.current).toBe(i + 1)
-        expect(p.total).toBe(6)
+        expect(p.total).toBe(total)
       })
     }
   })

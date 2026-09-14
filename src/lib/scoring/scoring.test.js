@@ -39,7 +39,8 @@ describe('anger scoring', () => {
       ['a1-trigger', 'a1-c'],
       ['a2-underlying', 'a2-a'],
       ['a3-boundary', 'a3-c'],
-      ['a4-signals', 'a4-c'],
+      ['a4-safety', 'a4-safety-no'],
+      ['a4-experience', 'a4-c'],
       ['a5-physical', 'a5-a'],
       ['a6-need', 'a6-a'],
     ])
@@ -55,18 +56,50 @@ describe('anger scoring', () => {
       ['a1-trigger', 'a1-b'],
       ['a2-underlying', 'a2-b'],
       ['a3-boundary', 'a3-a'],
-      ['a4-signals', 'a4-d'],
+      ['a4-safety', 'a4-safety-no'],
+      ['a4-experience', 'a4-d'],
       ['a5-physical', 'a5-c'],
     ])
-    const a = scoreAngerResults({ ...base, 'a6-need': anger.questions[5].options[0] })
-    const b = scoreAngerResults({ ...base, 'a6-need': anger.questions[5].options[4] })
+    const a = scoreAngerResults({ ...base, 'a6-need': anger.questions[6].options[0] })
+    const b = scoreAngerResults({ ...base, 'a6-need': anger.questions[6].options[4] })
     expect(a.resultId).toBe(b.resultId)
   })
 
-  it('short-circuits to safety', () => {
-    const answers = byId(anger, [['a4-signals', 'a4-a']])
+  it('short-circuits to safety only for explicit physical risk', () => {
+    const answers = byId(anger, [['a4-safety', 'a4-a']])
     const result = scoreAngerResults(answers)
     expect(result.resultId).toBe('SAFETY')
+  })
+
+  it('dismissed, powerless and unfair answers do not short-circuit to safety', () => {
+    for (const optId of ['a4-b', 'a4-c', 'a4-d']) {
+      const answers = byId(anger, [
+        ['a1-trigger', 'a1-a'],
+        ['a2-underlying', 'a2-a'],
+        ['a3-boundary', 'a3-c'],
+        ['a4-safety', 'a4-safety-no'],
+        ['a4-experience', optId],
+        ['a5-physical', 'a5-c'],
+        ['a6-need', 'a6-a'],
+      ])
+      const result = scoreAngerResults(answers)
+      expect(result.resultId).not.toBe('SAFETY')
+    }
+  })
+
+  it('emotional unease routes to threat not safety short-circuit', () => {
+    const answers = byId(anger, [
+      ['a1-trigger', 'a1-a'],
+      ['a2-underlying', 'a2-c'],
+      ['a3-boundary', 'a3-c'],
+      ['a4-safety', 'a4-safety-no'],
+      ['a4-experience', 'a4-e'],
+      ['a5-physical', 'a5-c'],
+      ['a6-need', 'a6-f'],
+    ])
+    const result = scoreAngerResults(answers)
+    expect(result.resultId).toBe('THREAT')
+    expect(result.resultId).not.toBe('SAFETY')
   })
 
   it('angry at myself does not add boundary points', () => {
@@ -74,7 +107,8 @@ describe('anger scoring', () => {
       ['a1-trigger', 'a1-a'],
       ['a2-underlying', 'a2-a'],
       ['a3-boundary', 'a3-d'],
-      ['a4-signals', 'a4-e'],
+      ['a4-safety', 'a4-safety-no'],
+      ['a4-experience', 'a4-e'],
       ['a5-physical', 'a5-c'],
       ['a6-need', 'a6-f'],
     ])
@@ -118,6 +152,46 @@ describe('procrastination scoring properties', () => {
     const answers = byId(procrastination, [['p1', 'p1-c']])
     const result = scoreProcrastinationResults(answers)
     expect(Object.keys(result.tally).length).toBe(0)
+  })
+
+  it('all-neutral answers return NO_CLEAR_BLOCKER', () => {
+    const answers = byId(procrastination, [
+      ['p1', 'p1-c'],
+      ['p2', 'p2-c'],
+      ['p3', 'p3-c'],
+      ['p4', 'p4-d'],
+      ['p5', 'p5-c'],
+      ['p6', 'p6-f'],
+    ])
+    const result = scoreProcrastinationResults(answers)
+    expect(result.resultId).toBe('NO_CLEAR_BLOCKER')
+    expect(result.tally).toEqual({})
+  })
+
+  it('waiting for motivation answers still return WAITING_MOTIVATION', () => {
+    const answers = byId(procrastination, [
+      ['p1', 'p1-c'],
+      ['p2', 'p2-c'],
+      ['p3', 'p3-c'],
+      ['p4', 'p4-d'],
+      ['p5', 'p5-c'],
+      ['p6', 'p6-d'],
+    ])
+    const result = scoreProcrastinationResults(answers)
+    expect(result.resultId).toBe('WAITING_MOTIVATION')
+  })
+
+  it('unclear first step still returns UNCLEAR', () => {
+    const answers = byId(procrastination, [
+      ['p1', 'p1-a'],
+      ['p2', 'p2-c'],
+      ['p3', 'p3-c'],
+      ['p4', 'p4-d'],
+      ['p5', 'p5-c'],
+      ['p6', 'p6-f'],
+    ])
+    const result = scoreProcrastinationResults(answers)
+    expect(result.resultId).toBe('UNCLEAR')
   })
 })
 

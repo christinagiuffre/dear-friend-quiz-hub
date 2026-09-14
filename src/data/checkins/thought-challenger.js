@@ -51,9 +51,9 @@ export const thoughtPatterns = {
   },
   NO_PATTERN: {
     id: 'NO_PATTERN',
-    label: 'No obvious thinking pattern',
+    label: 'No clear pattern',
     description:
-      'No obvious thinking pattern was identified. The thought may still be painful, and you can decide what response would serve you best.',
+      'No clear thinking pattern stood out. The thought may still be painful, and you can decide what response would serve you best.',
   },
 }
 
@@ -77,7 +77,8 @@ export const patternCheckQuestions = [
     key: 'predict',
     prompt: 'Are you predicting a bad outcome as if it is certain?',
     pattern: 'FORTUNE_TELLING',
-    keywords: /\b(will fail|going to fail|never work|ruin|disaster|certainly|definitely will|bound to)\b/i,
+    keywords:
+      /\b(will fail|going to fail|never work|ruin|disaster|certainly|definitely will|bound to|going to happen|will never|won't work)\b/i,
   },
   {
     id: 'q-wrong',
@@ -112,7 +113,7 @@ export const patternCheckQuestions = [
     key: 'emotion',
     prompt: 'Does it feel true mainly because the emotion is strong?',
     pattern: 'EMOTIONAL_REASONING',
-    keywords: null,
+    keywords: /\b(feel like|feels like|because i feel|i feel.*(so|therefore|must be|means))\b/i,
   },
   {
     id: 'q-magnify',
@@ -123,21 +124,61 @@ export const patternCheckQuestions = [
   },
 ]
 
-const DEFAULT_QUEUE = ['q-emotion', 'q-predict', 'q-mindread', 'q-should']
+/** Fallback questions only when no thought signal matches — excludes prediction catch-alls. */
+const DEFAULT_QUEUE = ['q-should']
 
-/** Pick up to 4 pattern questions — keyword hints first, then defaults. Transparent, not semantic AI. */
+const MIND_READING_THOUGHT_SIGNAL =
+  /\b(they|he|she|everyone|people|someone)\s+(hate|hates|think|thinks|feel|feels|want|wants|dislike|dislikes|don't like|doesn't like)\b/i
+
+const MIND_READING_ABOUT_ME_SIGNAL =
+  /\b(thinks?|thought|feels?|feeling)\s+(i'?m|i am|about me|of me)\b/i
+
+function questionMatchesThought(q, thought) {
+  return Boolean(q.keywords && q.keywords.test(thought))
+}
+
+export function thoughtSuggestsMindReading(thought) {
+  const text = thought || ''
+  return MIND_READING_THOUGHT_SIGNAL.test(text) || MIND_READING_ABOUT_ME_SIGNAL.test(text)
+}
+
+export function thoughtHasPredictionSignal(thought) {
+  const q = patternCheckQuestions.find((item) => item.id === 'q-predict')
+  return questionMatchesThought(q, thought)
+}
+
+function thoughtSupportsPattern(q, thought) {
+  if (!q) return false
+  if (questionMatchesThought(q, thought)) return true
+  if (q.pattern === 'MIND_READING' && thoughtSuggestsMindReading(thought)) return true
+  if (q.pattern === 'FORTUNE_TELLING' && thoughtHasPredictionSignal(thought)) return true
+  return false
+}
+
+function confidenceForMatch(q, thought) {
+  if (questionMatchesThought(q, thought)) return 'high'
+  return 'possible'
+}
+
+function formatPatternLabel(id, confidence) {
+  const base = thoughtPatterns[id]
+  if (confidence === 'possible') {
+    return `Possible ${base.label.toLowerCase()}`
+  }
+  return base.label
+}
+
+/** Pick up to 4 pattern questions — thought signals and keyword matches first. */
 export function getPatternQuestionQueue(thought) {
   const text = thought || ''
   const matched = []
-  const rest = []
 
   for (const q of patternCheckQuestions) {
-    if (q.keywords && q.keywords.test(text)) matched.push(q.id)
-    else if (!q.keywords) rest.push(q.id)
-    else rest.push(q.id)
+    if (thoughtSupportsPattern(q, text)) matched.push(q.id)
   }
 
-  const ordered = [...new Set([...matched, ...DEFAULT_QUEUE, ...rest])]
+  const defaults = DEFAULT_QUEUE.filter((id) => !matched.includes(id))
+  const ordered = [...new Set([...matched, ...defaults])]
   return ordered.slice(0, 4)
 }
 
@@ -150,29 +191,48 @@ export const checkPrompts = [
   { id: 'skip', label: 'Skip this' },
 ]
 
-export function detectPatterns(patternAnswers, questionQueue = []) {
-  const matched = []
+/**
+ * Conservative pattern detection — yes answers need thought-level support for that pattern.
+ */
+export function detectPatterns(patternAnswers, questionQueue = [], thought = '') {
   const orderedIds =
     questionQueue.length > 0
       ? questionQueue
       : patternCheckQuestions.map((q) => q.id)
 
+  const confirmed = []
+
   for (const qId of orderedIds) {
     const q = patternCheckQuestions.find((item) => item.id === qId)
-    if (q && patternAnswers[q.id] === 'yes') matched.push(q.pattern)
+    if (!q || patternAnswers[q.id] !== 'yes') continue
+    if (!thoughtSupportsPattern(q, thought)) continue
+
+    const confidence = confidenceForMatch(q, thought)
+    const existing = confirmed.find((item) => item.id === q.pattern)
+    if (existing) {
+      if (confidence === 'high' && existing.confidence !== 'high') {
+        existing.confidence = 'high'
+        existing.label = formatPatternLabel(q.pattern, 'high')
+      }
+      continue
+    }
+
+    confirmed.push({
+      id: q.pattern,
+      ...thoughtPatterns[q.pattern],
+      label: formatPatternLabel(q.pattern, confidence),
+      confidence,
+    })
   }
 
-  const unique = [...new Set(matched)]
-
-  if (unique.length === 0) {
+  if (confirmed.length === 0) {
     return {
-      patterns: [{ id: 'NO_PATTERN', ...thoughtPatterns.NO_PATTERN }],
+      patterns: [{ id: 'NO_PATTERN', ...thoughtPatterns.NO_PATTERN, confidence: 'none' }],
+      hasClearPattern: false,
     }
   }
 
-  const patterns = unique.slice(0, 2).map((id) => ({ id, ...thoughtPatterns[id] }))
-
-  return { patterns }
+  return { patterns: confirmed.slice(0, 2), hasClearPattern: true }
 }
 
 export function formatBeliefShift(beliefBefore, beliefAfter, { beforeRated = false, afterRated = false } = {}) {
@@ -191,17 +251,39 @@ const STARTERS = {
   NEGATIVE_FILTER:
     'Something went wrong — and other things may have gone okay too. I can hold both.',
   LABELLING: 'This action or mistake does not define my whole identity.',
-  SHOULDING: 'I would prefer to ___, but I do not have to be perfect.',
-  PERSONALISING: 'I am responsible for ___, but I cannot control everything.',
+  SHOULDING: 'I would prefer to do my best, but I do not have to be perfect.',
+  PERSONALISING: 'I am responsible for my part, but I cannot control everything.',
   EMOTIONAL_REASONING:
     'I feel this strongly — and feelings are real. That doesn’t automatically make the thought a fact.',
   MAGNIFYING: 'This feels huge right now. It may not be the whole picture.',
   NO_PATTERN: 'This is a hard thought. I can choose a response that helps me, even without a neat label.',
 }
 
-export function suggestBalancedThought(patterns) {
+function buildThoughtAnchoredStarter(thought) {
+  const trimmed = thought.trim()
+  if (!trimmed) return STARTERS.NO_PATTERN
+
+  if (/\b(don'?t|do not) like\b/i.test(trimmed) || /\bdidn'?t like\b/i.test(trimmed)) {
+    return 'I didn’t like how that felt. That reaction makes sense, and I can decide what I want to do next — without assuming what they meant.'
+  }
+
+  if (thoughtSuggestsMindReading(trimmed)) {
+    return 'I don’t know for certain what they think or feel. I can notice what happened and choose how I want to respond.'
+  }
+
+  return `This thought matters: “${trimmed}”. I can respond in a way that helps me, without needing a perfect label.`
+}
+
+export function suggestBalancedThought(patterns, thought = '') {
   const primary = patterns[0]?.id
-  return STARTERS[primary] || STARTERS.NO_PATTERN
+  if (!primary || primary === 'NO_PATTERN') {
+    return buildThoughtAnchoredStarter(thought)
+  }
+
+  const patternStarter = STARTERS[primary] || STARTERS.NO_PATTERN
+  const trimmed = thought.trim()
+  if (!trimmed) return patternStarter
+  return `About “${trimmed}”: ${patternStarter}`
 }
 
 const thoughtChallenger = {

@@ -38,9 +38,10 @@ export function generateQaReport() {
       'a1-trigger': anger.questions[0].options[0],
       'a2-underlying': q2,
       'a3-boundary': anger.questions[2].options[2],
-      'a4-signals': anger.questions[3].options[4],
-      'a5-physical': anger.questions[4].options[2],
-      'a6-need': anger.questions[5].options[0],
+      'a4-safety': anger.questions[3].options[1],
+      'a4-experience': anger.questions[4].options[4],
+      'a5-physical': anger.questions[5].options[2],
+      'a6-need': anger.questions[6].options[0],
     }
     bump(angerDistribution, scoreAngerResults(answers).resultId)
   }

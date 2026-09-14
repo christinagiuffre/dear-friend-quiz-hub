@@ -35,10 +35,8 @@ export default function ThoughtChallengerResult() {
 
   const patternBody =
     patterns.length > 0
-      ? patterns
-          .map((p) => `${p.label}. ${p.description}`)
-          .join(' ')
-      : 'No obvious thinking pattern was identified. The thought may still be painful, and you can choose what response would serve you best.'
+      ? patterns.map((p) => `${p.label}. ${p.description}`).join(' ')
+      : 'No clear thinking pattern stood out. The thought may still be painful, and you can decide what response would serve you best.'
 
   const sections = [
     { heading: 'Possible thinking pattern', body: patternBody },

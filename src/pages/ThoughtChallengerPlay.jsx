@@ -128,18 +128,18 @@ export default function ThoughtChallengerPlay() {
     }
 
     if (step === 3) {
-      const { patterns } = detectPatterns(form.patternAnswers, patternQueue)
+      const { patterns } = detectPatterns(form.patternAnswers, patternQueue, form.thought)
       if (!form.balancedThought) {
-        update('balancedThought', suggestBalancedThought(patterns))
+        update('balancedThought', suggestBalancedThought(patterns, form.thought))
       }
       setStep(4)
       return
     }
 
     if (step === 4) {
-      const { patterns } = detectPatterns(form.patternAnswers, patternQueue)
+      const { patterns } = detectPatterns(form.patternAnswers, patternQueue, form.thought)
       const balancedThought =
-        form.balancedThought || suggestBalancedThought(patterns)
+        form.balancedThought || suggestBalancedThought(patterns, form.thought)
       navigate(`/quiz/${checkin.id}/result/complete`, {
         replace: true,
         state: {
