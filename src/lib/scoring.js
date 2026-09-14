@@ -1,34 +1,118 @@
-// Counts category scores, picks winner with tie-break priority,
-// and detects mixed / close-second results for the result screen.
+import { scoreAngerResults } from './scoring/angerScoring.js'
+import { scoreNeedsResults } from './scoring/needsScoring.js'
+import { scoreProcrastinationResults } from './scoring/procrastinationScoring.js'
+import { getApplicableQuestions } from './quizFlow.js'
 
-export function scoreQuiz(quiz, answers) {
+const SECONDARY_MIN_SCORE = 3
+const SECONDARY_RATIO = 0.7
+const SECONDARY_MAX_GAP = 2
+
+export function scoreQuiz(quiz, answersByQuestionId) {
   const tally = {}
   for (const key of Object.keys(quiz.results)) tally[key] = 0
-  for (const answer of answers) {
-    if (answer && answer in tally) tally[answer] += 1
+
+  const applicable = getApplicableQuestions(quiz, answersByQuestionId)
+  for (const q of applicable) {
+    const ans = answersByQuestionId[q.id]
+    if (ans?.result && ans.result in tally) tally[ans.result] += 1
   }
 
   const priority = quiz.tiePriority || Object.keys(quiz.results)
   const entries = Object.entries(tally).sort((a, b) => b[1] - a[1])
-  const highest = entries[0][1]
-  const leaders = entries.filter(([, score]) => score === highest).map(([key]) => key)
+  const highest = entries[0]?.[1] ?? 0
+  const leaders = entries.filter(([, s]) => s === highest).map(([k]) => k)
 
   let resultId
-  if (leaders.length === 1) {
-    resultId = leaders[0]
-  } else {
-    resultId = priority.find((key) => leaders.includes(key)) || leaders[0]
-  }
+  if (leaders.length === 1) resultId = leaders[0]
+  else resultId = priority.find((k) => leaders.includes(k)) || leaders[0]
 
   const winnerScore = tally[resultId]
-  const runnerUp = entries.find(([key]) => key !== resultId && tally[key] > 0)
+  const runnerUp = entries.find(([k]) => k !== resultId && tally[k] > 0)
   const secondResultId = runnerUp ? runnerUp[0] : null
   const secondScore = runnerUp ? runnerUp[1] : 0
+  const isMixed =
+    leaders.length > 1 || (secondResultId && winnerScore - secondScore === 1)
 
-  const isTiedAtTop = leaders.length > 1
-  const onePointApart = secondResultId !== null && winnerScore - secondScore === 1
-  const isMixed = isTiedAtTop || onePointApart
-  const showAlsoShowingUp = secondResultId !== null && isMixed
+  return {
+    resultId,
+    secondResultId: isMixed ? secondResultId : null,
+    tally,
+    isMixed,
+    showAlsoShowingUp: isMixed && secondResultId != null,
+    tailoring: {},
+  }
+}
 
-  return { resultId, secondResultId, tally, isMixed, showAlsoShowingUp }
+export function scoreWeightedQuiz(quiz, answersByQuestionId) {
+  if (quiz.id === 'behind-my-anger') return scoreAngerResults(answersByQuestionId)
+  if (quiz.id === 'what-do-i-need') return scoreNeedsResults(answersByQuestionId)
+  if (quiz.id === 'why-procrastinating') return scoreProcrastinationResults(answersByQuestionId)
+
+  // Generic fallback
+  const tally = {}
+  const applicable = getApplicableQuestions(quiz, answersByQuestionId)
+
+  for (const q of applicable) {
+    const role = q.scoringRole || 'cause'
+    const ans = answersByQuestionId[q.id]
+    if (!ans || role === 'tailoring') continue
+    if (ans.shortCircuit) {
+      return {
+        resultId: ans.shortCircuit,
+        secondResultId: null,
+        tally: { [ans.shortCircuit]: 999 },
+        showAlsoShowingUp: false,
+        tailoring: {},
+      }
+    }
+    for (const [key, w] of Object.entries(ans.scores || {})) {
+      tally[key] = (tally[key] || 0) + w
+    }
+  }
+
+  const priority = quiz.tiePriority || Object.keys(quiz.results)
+  const entries = Object.entries(tally)
+    .filter(([, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1])
+
+  if (!entries.length) {
+    return { resultId: priority[0], secondResultId: null, tally, showAlsoShowingUp: false, tailoring: {} }
+  }
+
+  const highest = entries[0][1]
+  const leaders = entries.filter(([, s]) => s === highest).map(([k]) => k)
+  const resultId =
+    leaders.length === 1 ? leaders[0] : priority.find((k) => leaders.includes(k)) || leaders[0]
+
+  const runner = entries.find(([k]) => k !== resultId)
+  const secondResultId =
+    runner &&
+    runner[1] >= SECONDARY_MIN_SCORE &&
+    (resultId && tally[resultId] - runner[1] <= SECONDARY_MAX_GAP ||
+      runner[1] / tally[resultId] >= SECONDARY_RATIO)
+      ? runner[0]
+      : null
+
+  return {
+    resultId,
+    secondResultId,
+    tally,
+    showAlsoShowingUp: secondResultId != null,
+    tailoring: {},
+  }
+}
+
+export function buildScoringAudit(quiz, answersByQuestionId) {
+  const scored = scoreWeightedQuiz(quiz, answersByQuestionId)
+  return {
+    answersByQuestionId: Object.fromEntries(
+      Object.entries(answersByQuestionId).map(([k, v]) => [k, v?.id || v])
+    ),
+    tally: scored.tally,
+    primary: scored.resultId,
+    secondary: scored.secondResultId,
+    tertiary: scored.tertiaryResultId,
+    tailoring: scored.tailoring,
+    layered: scored.layered,
+  }
 }

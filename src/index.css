@@ -340,15 +340,50 @@
 
   /* ── Quiz options ── */
   .option {
-    @apply flex w-full min-h-[52px] items-center gap-3 rounded-[18px] border-2 border-transparent
-           bg-white px-4 py-3.5 text-left text-[15px] text-ink shadow-soft
-           transition hover:border-purple/20 hover:shadow-card active:scale-[0.99];
+    @apply flex w-full min-h-[52px] items-center gap-3 rounded-[18px] border-2
+           px-4 py-3.5 text-left text-[15px] text-ink shadow-soft
+           transition active:scale-[0.99];
     line-height: 1.45;
   }
 
+  .option-default {
+    @apply border-transparent bg-white;
+  }
+
+  .option-default:hover {
+    @apply border-purple/20 bg-white;
+  }
+
   .option-selected {
-    border-color: rgba(136, 72, 216, 0.4);
-    background: linear-gradient(90deg, rgba(136, 72, 216, 0.06), rgba(65, 160, 228, 0.04));
+    border-color: rgba(136, 72, 216, 0.45);
+    background: linear-gradient(90deg, rgba(136, 72, 216, 0.08), rgba(65, 160, 228, 0.05));
+  }
+
+  .option:focus {
+    outline: none;
+  }
+
+  .option:focus-visible {
+    border-color: rgba(65, 160, 228, 0.5);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 0 0 3px rgba(65, 160, 228, 0.25);
+  }
+
+  .option-selected:focus-visible {
+    border-color: rgba(136, 72, 216, 0.5);
+    box-shadow: 0 0 0 3px rgba(136, 72, 216, 0.2);
+  }
+
+  .option-radio {
+    @apply h-4 w-4 shrink-0 rounded-full border-2 transition;
+  }
+
+  .option-radio-default {
+    @apply border-purple/25 bg-white;
+  }
+
+  .option-radio-selected {
+    @apply border-purple bg-purple;
   }
 
   .trust-item {
@@ -532,6 +567,140 @@
 
   .intro-art-img {
     @apply h-auto w-[130px] max-h-[110px] object-contain select-none;
+  }
+
+  /* ── Hub categories & tool cards ── */
+  .category-section {
+    @apply mt-6;
+  }
+
+  .category-section:first-of-type {
+    @apply mt-4;
+  }
+
+  .category-title {
+    @apply font-display text-[13px] font-bold uppercase tracking-[0.12em] text-purple/70;
+  }
+
+  .category-desc {
+    @apply muted-text mt-1;
+  }
+
+  .tool-card-list {
+    @apply mt-3 space-y-3;
+  }
+
+  .tool-card {
+    border-radius: 22px;
+    border: 1px solid rgba(136, 72, 216, 0.14);
+    @apply bg-white/80 shadow-soft;
+  }
+
+  .tool-card-inner {
+    @apply flex gap-3 p-3.5;
+  }
+
+  .tool-card-art {
+    @apply shrink-0;
+  }
+
+  .tool-card-art .hub-art-wrap {
+    width: 88px;
+    height: 76px;
+    margin: 0;
+  }
+
+  .tool-card-art .hub-art-img {
+    width: 80px;
+    max-height: 68px;
+  }
+
+  .tool-card-content {
+    @apply flex min-w-0 flex-1 flex-col;
+  }
+
+  .tool-card-title {
+    @apply font-display text-[16px] font-bold text-ink;
+    line-height: 1.2;
+  }
+
+  .tool-card-desc {
+    @apply mt-1 text-[13px] text-ink/75;
+    line-height: 1.45;
+  }
+
+  .tool-card-meta {
+    @apply mt-1 text-[11px] font-medium text-muted;
+  }
+
+  .tool-card-btn {
+    @apply mt-2.5 !min-h-[44px] !w-auto !px-5 !text-[14px];
+  }
+
+  /* ── Boredom playful theme ── */
+  .boredom-play .boredom-card {
+    border-color: rgba(251, 191, 36, 0.35);
+    background: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 251, 235, 0.9) 50%,
+      rgba(254, 243, 199, 0.85) 100%
+    );
+  }
+
+  .boredom-result {
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+
+  .boredom-suggestion {
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+
+  /* ── Form fields (Thought Challenger) ── */
+  .form-fields {
+    @apply space-y-4;
+  }
+
+  .form-field {
+    @apply block w-full;
+  }
+
+  .form-label {
+    @apply mb-1.5 block text-[13px] font-semibold text-ink/85;
+  }
+
+  .form-input {
+    @apply w-full rounded-[16px] border border-purple/15 bg-white px-3.5 py-2.5
+           text-[15px] text-ink shadow-inset transition;
+    line-height: 1.45;
+  }
+
+  .form-input:focus {
+    @apply border-purple/35 outline-none ring-2 ring-purple/15;
+  }
+
+  .belief-slider {
+    @apply mt-2 w-full accent-purple;
+  }
+
+  .five-minute-step summary {
+    list-style: none;
+  }
+
+  .result-now-card {
+    border-radius: 20px;
+    padding: 14px 16px;
+    border: 2px solid rgba(136, 72, 216, 0.25);
+    background: rgba(237, 228, 252, 0.5);
+    @apply text-left;
+  }
+
+  .result-section-card {
+    border-radius: 18px;
+    border: 1px solid rgba(136, 72, 216, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    padding: 14px 16px;
+    @apply text-left;
   }
 }
 

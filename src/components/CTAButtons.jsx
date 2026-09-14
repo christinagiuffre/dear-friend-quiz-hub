@@ -30,7 +30,7 @@ export default function CTAButtons({ quizId, shareTitle, shareText, shareUrl }) 
           url={shareUrl}
           variant="text"
         />
-        <Link to={`/quiz/${quizId}/play`} className="btn-text">
+        <Link to={`/quiz/${quizId}/play?fresh=1`} className="btn-text">
           Take again
         </Link>
         <Link to="/" className="btn-text">

@@ -1,0 +1,23 @@
+# Dear Friend Check-Ins QA Report
+Generated: 2026-09-14T14:21:14.036Z
+
+## Boredom catalogue
+- Total activities: 47
+- Invalid metadata: 0
+
+## Result distribution (sampled)
+### Anger
+- HURT: 2
+- UNFAIR: 1
+- THREAT: 1
+- OVERLOAD: 1
+- POWERLESS: 1
+### Needs
+- CONNECTION: 3
+- PHYSICAL_RESET: 1
+### Procrastination
+- UNCLEAR: 6
+
+## Golden journey D
+- Profile: {"energy":"unsure","setting":"either","socialMode":"flexible","cravings":["unsure"],"time":"one-hour","budget":"flexible"}
+- Results: Five-minute journal dump, Buy a book or audiobook, Rent or buy a film at home

@@ -7,7 +7,7 @@ export const site = {
 
   hubIntro: 'Tiny, gentle check-ins for when you feel a bit off.',
 
-  hubHook: 'Free 60-second quizzes · No sign-up needed',
+  hubHook: 'Free guided check-ins · No sign-up needed',
 
   url: 'https://quiz.mach.global',
   shortUrl: 'quiz.mach.global',
@@ -39,5 +39,5 @@ export const site = {
   },
 
   disclaimer:
-    'This is not a diagnosis or medical advice. It’s a self-reflection tool inspired by the Dear Friend book and app.',
+    'These tools are intended for reflection and general wellbeing. They do not provide a medical or psychological diagnosis.',
 }

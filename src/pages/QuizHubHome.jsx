@@ -1,11 +1,12 @@
 import Layout from '../components/Layout'
-import QuizCard, { ComingSoonCard } from '../components/QuizCard'
+import CategorySection from '../components/hub/CategorySection'
 import Disclaimer from '../components/Disclaimer'
-import { quizzes, comingSoon } from '../data/quizzes'
+import { checkins } from '../data/quizzes'
+import { hubCategories } from '../data/hub'
 import { site } from '../data/site'
 
 export default function QuizHubHome() {
-  const liveQuiz = quizzes[0]
+  const byCategory = (categoryId) => checkins.filter((c) => c.category === categoryId)
 
   return (
     <Layout>
@@ -19,16 +20,13 @@ export default function QuizHubHome() {
           <p className="hub-intro">{site.hubIntro}</p>
         </section>
 
-        {liveQuiz && <QuizCard quiz={liveQuiz} />}
-
-        <section className="soon-section">
-          <h2 className="soon-heading">More gentle check-ins coming soon</h2>
-          <ul className="soon-list">
-            {comingSoon.map((title) => (
-              <ComingSoonCard key={title} title={title} />
-            ))}
-          </ul>
-        </section>
+        {hubCategories.map((category) => (
+          <CategorySection
+            key={category.id}
+            category={category}
+            checkins={byCategory(category.id)}
+          />
+        ))}
 
         <Disclaimer className="mt-5" />
       </div>
